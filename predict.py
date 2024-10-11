@@ -2,6 +2,7 @@ from ultralytics import YOLO
 import cv2
 import torch
 import pandas as pd
+from matplotlib import pyplot as plt
 
 import numpy as np
 
@@ -11,7 +12,7 @@ import numpy as np
 model = YOLO("yolov8m-seg.pt")  # load an official model
 
 #Add img or Video as a var to pass to cv2
-img = cv2.imread("/Users/mcameron/yolo/20240904140832_MP4-0016.jpg")
+img = cv2.imread("/home/gear/yolo/20240904140832_MP4-0016.jpg")
 
 # Saves to /runs/predict/img
 #model.predict(img, save=True)
@@ -20,7 +21,29 @@ img = cv2.imread("/Users/mcameron/yolo/20240904140832_MP4-0016.jpg")
 #run inference on the image
 #https://docs.ultralytics.com/modes/predict/#inference-sources
 #results = model(img, conf=0.25)
-results = model.predict(img)
+results = model(img)
+person_points = {}
+person = results[0].masks.xy[0]
+ball = results[0].masks.xy[8]
+
+#print(person)
+#print(ball)
+plt.imshow(person)
+plt.colorbar()
+plt.show()
+
+#next i need to figure out whats the best representation for a intersection of two points aka player and ball
+## either masks or boxes classes respectively
+
+
+#we have the box of the ball
+#print(results[0].boxes.xyxy[0])
+
+##(results[0].boxes.xyxy[8])
+
+
+#for idx,point in enumerate(person):
+#    print(idx,point)
 
 #print(results[0])
 #xy_cords = masks.xy
@@ -35,16 +58,3 @@ results = model.predict(img)
 #df = pd.DataFrame(data)
 #print(df)
 
-
-person = results[0].masks.xyn[0]
-ball = results[0].masks.xyn[8]
-
-#get predictions coords and do some math
-
-#results.print()
-## Get specific keypoint of leg and ball and see how we can track touches
-## Maybe play around with these specific keypoints
-## Track keypoint in relation to the ball
-#can get the visual matched with the xyn coordinate array of each segmentation mask
-#https://docs.ultralytics.com/reference/engine/results/#ultralytics.engine.results.Masks.xyn
-#next step try to single out an array and visualize
