@@ -12,7 +12,7 @@ import numpy as np
 model = YOLO("yolov8m-seg.pt")  # load an official model
 
 #Add img or Video as a var to pass to cv2
-img = cv2.imread("/Users/mcameron/yolo/20240904140832_MP4-0016.jpg")
+img = cv2.imread("/home/gear/yolo/20240904140832_MP4-0016.jpg")
 
 # Saves to /runs/predict/img
 #model.predict(img, save=True)
@@ -43,6 +43,50 @@ for i, (cls, conf, box) in enumerate(zip(classes,confidences, boxes)):
 for box in filtered_boxes:
     x1, y1, x2, y2 = box.xyxy[0].cpu().numpy().astype(np.int32)
     cv2.rectangle(img, (int(x1), int(y1)), (int(x2), int(y2)), color=(255,0,0), thickness=2)
+
+def check_box_overlap(box1, box2):
+    x1_1, y1_1, x2_1, y2_1 = box1
+    x1_2, y1_2, x2_2, y2_2 = box2
+
+    if x2_1 < x1_2 or x2_2 < x1_1:
+        return False
+
+    if y2_1 < y1_2 or y2_2 < y1_1:
+        return False
+
+    return True
+
+## Person box
+# Ball box
+
+x = filtered_boxes[0].xywh[0][0]
+y = filtered_boxes[0].xywh[0][1]
+width = filtered_boxes[0].xywh[0][2]
+height = filtered_boxes[0].xywh[0][3]
+
+person = filtered_boxes[0].cls
+
+x1_1 = int(x - width / 2)
+x2_1 = int(x + width / 2)
+y1_1 = int(y - height / 2)
+y2_1 = int(y + height / 2)
+
+x_1 = filtered_boxes[-1].xywh[0][0]
+y_1 = filtered_boxes[-1].xywh[0][1]
+width_2 = filtered_boxes[-1].xywh[0][2]
+height_2 = filtered_boxes[-1].xywh[0][3]
+
+ball = filtered_boxes[-1].cls
+x1_2= int(x_1 - width_2 / 2)
+x2_2 = int(x_1 + width_2 / 2)
+y1_2 = int(y_1 - height_2 / 2)
+y2_2 = int(y_1 + height_2 / 2)
+
+if check_box_overlap((x1_1, y1_1, x2_1, y2_1),(x1_2, y1_2, x2_2, y2_2)) == True:
+    print("Theres a touch")
+
+collided = []
+
 
 cv2.imshow("Filtered Detections", img)
 cv2.waitKey(0)
